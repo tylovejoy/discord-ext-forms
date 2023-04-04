@@ -61,7 +61,7 @@ class ReactionForm:  # I don't like subclassing shut up
             The emoji to add.
         """
 
-        self._reactions[str(reaction)] = result
+        self._reactions[reaction] = result
         return self._reactions
 
     async def start(self) -> Any:
@@ -128,7 +128,7 @@ class ReactionMenu(object):
         timeout : int
             The timeout to be set in seconds.
         """
-        int(timeout)
+        timeout
         self._timeout = timeout
 
     def remove_reactions(self, bool: bool = True):
@@ -158,8 +158,8 @@ class ReactionMenu(object):
             an emoji that was already set) and True means
             that everything was successful.
         """
-        int(page)
-        if emoji in ["◀", "⏹", "▶"]:
+        page
+        if emoji in {"◀", "⏹", "▶"}:
             return False
         self._mappings[emoji] = page
         return True
@@ -210,17 +210,15 @@ class ReactionMenu(object):
             except asyncio.TimeoutError:
                 return await msg.edit("Timeout!")
             if str(r.emoji) in emojis:
-                if str(r.emoji) == emojis[0]:
-                    if current != 0:
-                        await msg.edit(embed=embeds[current - 1])
-                        current = current - 1
+                if str(r.emoji) == emojis[0] and current != 0:
+                    await msg.edit(embed=embeds[current - 1])
+                    current = current - 1
                 if str(r.emoji) == emojis[1]:
                     await msg.clear_reactions()
                     break
-                if str(r.emoji) == emojis[2]:
-                    if current != len(embeds) - 1:
-                        await msg.edit(embed=embeds[current + 1])
-                        current += 1
+                if str(r.emoji) == emojis[2] and current != len(embeds) - 1:
+                    await msg.edit(embed=embeds[current + 1])
+                    current += 1
             if str(r.emoji) in cemojis.keys():
                 await msg.edit(embed=embeds[cemojis[str(r.emoji)]] - 1)
                 current = cemojis[str(r.emoji)]
