@@ -8,7 +8,7 @@ import json
 from emoji import UNICODE_EMOJI
 class FormResponse:
     def __init__(self,data:dict) -> None:
-        for d in data.keys():
+        for d in data:
             if isinstance(data[d], dict):
                 setattr(self,d,data[d]['res'])
             else:
@@ -55,14 +55,11 @@ class Form:
         tries : int
             The number of tries to set.
         """
-        int(tries)
+        tries
         self._tries = tries
 
     def enable_cancelkeywords(self, enabled: bool):
-        if enabled:
-            self.cancelkeywords = ['cancel', 'stop', 'quit']
-        else:
-            self.cancelkeywords = []
+        self.cancelkeywords = ['cancel', 'stop', 'quit'] if enabled else []
 
     def add_cancelkeyword(self, word):
         self.cancelkeywords.append(word.lower())
@@ -98,10 +95,10 @@ class Form:
         """
         if not key:
             key = question
-        valid_qtypes = ['invite','channel','user','member','role','category','emoji', 'file']
         dictionary = {'res':None,'question':question}
         if qtype:
             dictionary['type'] = None
+            valid_qtypes = ['invite','channel','user','member','role','category','emoji', 'file']
             if qtype.lower() not in valid_qtypes:
                 raise InvalidFormType(f"Type '{qtype}' is invalid!")
             dictionary['type'] = qtype
@@ -109,57 +106,49 @@ class Form:
 
         self._questions[key] = dictionary
         self.set_incorrect_message('You answered incorrectly too many times. Please try again.')
-        self.set_retry_message(f'Please try again.')
+        self.set_retry_message('Please try again.')
         return self._questions
 
     async def __validate_input(self,qtype,message):
         answer = message.content
         if qtype.lower() == 'invite':
             try:
-                invite = await commands.InviteConverter().convert(self._ctx,answer)
-                return invite
+                return await commands.InviteConverter().convert(self._ctx,answer)
             except Exception as e:
                 return False
         elif qtype.lower() == 'category':
             try:
-                category = await commands.CategoryChannelConverter().convert(self._ctx, answer)
-                return category
+                return await commands.CategoryChannelConverter().convert(self._ctx, answer)
             except Exception:
                 return False
         elif qtype.lower() == 'channel':
             try:
-                channel = await commands.TextChannelConverter().convert(self._ctx,answer)
-                return channel
+                return await commands.TextChannelConverter().convert(self._ctx,answer)
             except:
                 return False
         elif qtype.lower() == 'user':
             try:
-                user = await commands.UserConverter().convert(self._ctx,answer)
-                return user
+                return await commands.UserConverter().convert(self._ctx,answer)
             except:
                 return False
         elif qtype.lower() == 'member':
             try:
-                member = await commands.MemberConverter().convert(self._ctx,answer)
-                return member
+                return await commands.MemberConverter().convert(self._ctx,answer)
             except:
                 return False
         elif qtype.lower() == 'role':
             try:
-                role = await commands.RoleConverter().convert(self._ctx,answer)
-                return role
+                return await commands.RoleConverter().convert(self._ctx,answer)
             except:
                 return False
         elif qtype.lower() == 'category':
             try:
-                category = await commands.CategoryChannelConverter().convert(self._ctx,answer)
-                return category
+                return await commands.CategoryChannelConverter().convert(self._ctx,answer)
             except:
                 return False
         elif qtype.lower() == 'emoji':
             try:
-                emoji = await commands.EmojiConverter().convert(self._ctx,answer)
-                return emoji
+                return await commands.EmojiConverter().convert(self._ctx,answer)
             except:
                 try:
                     assert answer in UNICODE_EMOJI
@@ -188,7 +177,7 @@ class Form:
         bool
             The state of edit and delete (after this is completed)
         """
-        if choice == None:
+        if choice is None:
             if self.editanddelete == True:
                 self.editanddelete = False
                 return False
@@ -221,7 +210,7 @@ class Form:
 
     async def set_color(self,color:str) -> None:
         """Sets the color of the form embeds."""
-        match = re.match(r'(0x|#)(\d|(f|F|d|D|a|A|c|C|E|e|b|B)){6}', str(color))
+        match = re.match(r'(0x|#)(\d|(f|F|d|D|a|A|c|C|E|e|b|B)){6}', color)
         if not match:
             raise InvalidColor(f"{color} is invalid. Be sure to use colors such as '0xffffff'")
         if color.startswith("#"):
@@ -275,6 +264,7 @@ class Form:
 
             def check(m):
                 return m.channel == prompt.channel and m.author == self._ctx.author
+
             question = None
             for x in self._questions.keys():
                 if self._questions[x]['question'].lower() == embed.description.lower():
@@ -302,7 +292,10 @@ class Form:
                             break
                         else:
                             self._tries -= 1
-                            await channel.send(self._retrymsg+f" You have `{self._tries}` remaining.",delete_after=3)
+                            await channel.send(
+                                f"{self._retrymsg} You have `{self._tries}` remaining.",
+                                delete_after=3,
+                            )
                             msg = await self._bot.wait_for('message',check=check,timeout=self.timeout)
                             ans = msg.content
                             if self.editanddelete:
@@ -348,10 +341,7 @@ class NaiveForm:
         self.cancelkeywords = ['cancel', 'stop', 'quit']
 
     def enable_cancelkeywords(self, enabled: bool):
-        if enabled:
-            self.cancelkeywords = ['cancel', 'stop', 'quit']
-        else:
-            self.cancelkeywords = []
+        self.cancelkeywords = ['cancel', 'stop', 'quit'] if enabled else []
 
     def add_cancelkeyword(self, word):
         self.cancelkeywords.append(word.lower())
@@ -375,7 +365,7 @@ class NaiveForm:
         tries : int
             The number of tries to set.
         """
-        int(tries)
+        tries
         self._tries = tries
 
     def add_question(self,question,key:str=None,qtype=None) -> List[dict]:
@@ -408,10 +398,10 @@ class NaiveForm:
         """
         if not key:
             key = question
-        valid_qtypes = ['invite','channel', 'member', 'role', 'category', 'emoji', 'file']
         dictionary = {'res':None,'question':question}
         if qtype:
             dictionary['type'] = None
+            valid_qtypes = ['invite','channel', 'member', 'role', 'category', 'emoji', 'file']
             if qtype.lower() not in valid_qtypes:
                 raise InvalidFormType(f"Type '{qtype}' is invalid!")
             dictionary['type'] = qtype
@@ -419,7 +409,7 @@ class NaiveForm:
 
         self._questions[key] = dictionary
         self.set_incorrect_message('You answered incorrectly too many times. Please try again.')
-        self.set_retry_message(f'Please try again.')
+        self.set_retry_message('Please try again.')
         return self._questions
 
     async def __validate_input(self,qtype,message):
@@ -458,7 +448,7 @@ class NaiveForm:
         bool
             The state of edit and delete (after this is completed)
         """
-        if choice == None:
+        if choice is None:
             if self.editanddelete == True:
                 self.editanddelete = False
                 return False
@@ -538,6 +528,7 @@ class NaiveForm:
 
             def check(m):
                 return m.channel == prompt.channel and m.author == author
+
             question = None
             for x in self._questions.keys():
                 if self._questions[x]['question'].lower() == embed.description.lower():
@@ -564,7 +555,10 @@ class NaiveForm:
                             break
                         else:
                             self._tries -= 1
-                            await channel.send(self._retrymsg+f" You have `{self._tries}` remaining.",delete_after=3)
+                            await channel.send(
+                                f"{self._retrymsg} You have `{self._tries}` remaining.",
+                                delete_after=3,
+                            )
                             msg = await self._bot.wait_for('message',check=check,timeout=self.timeout)
                             ans = msg.content
                             if self.editanddelete:
